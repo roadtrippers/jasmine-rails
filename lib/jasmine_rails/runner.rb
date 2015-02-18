@@ -6,12 +6,16 @@ module JasmineRails
       # Run the Jasmine testsuite via phantomjs CLI
       # raises an exception if any errors are encountered while running the testsuite
       def run(spec_filter = nil, reporters = 'console')
+        start_time = Time.now
+        puts "Starting Runner.run"
         override_rails_config do
           require 'phantomjs' if JasmineRails.use_phantom_gem?
           require 'fileutils'
+          puts "Required phantomjs and fileutils, T+#{Time.now - start_time}"
 
           include_offline_asset_paths_helper
           html = get_spec_runner(spec_filter, reporters)
+          puts "Got spec runner, T+#{Time.now - start_time}"
           FileUtils.mkdir_p JasmineRails.tmp_dir
           runner_path = JasmineRails.tmp_dir.join('runner.html')
           asset_prefix = Rails.configuration.assets.prefix.gsub(/\A\//,'')
@@ -19,7 +23,9 @@ module JasmineRails
 
           phantomjs_runner_path = File.join(File.dirname(__FILE__), '..', 'assets', 'javascripts', 'jasmine-runner.js')
           phantomjs_cmd = JasmineRails.use_phantom_gem? ? Phantomjs.path : 'phantomjs'
+          puts "Running tests, T+#{Time.now - start_time}"
           run_cmd %{"#{phantomjs_cmd}" "#{phantomjs_runner_path}" "#{runner_path.to_s}?spec=#{spec_filter}"}
+          puts "Finished!, T+#{Time.now - start_time}"
         end
       end
 
