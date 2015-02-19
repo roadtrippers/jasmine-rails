@@ -59,12 +59,18 @@ module JasmineRails
       end
 
       def get_spec_runner(spec_filter, reporters)
+        start_time = Time.now
+        puts "Start get_spec_runner (T=#{Time.now - start_time})"
         app = ActionDispatch::Integration::Session.new(Rails.application)
+        puts "Got app (T=#{Time.now - start_time})"
         app.https!(JasmineRails.force_ssl)
+        puts "Forced SSL (T=#{Time.now - start_time})"
         path = JasmineRails.route_path
+        puts "got path (T=#{Time.now - start_time})"
         JasmineRails::OfflineAssetPaths.disabled = false
         app.get path, :reporters => reporters, :spec => spec_filter
         JasmineRails::OfflineAssetPaths.disabled = true
+        puts "app.get path (T=#{Time.now - start_time})"
         unless app.response.success?
           raise "Jasmine runner at '#{path}' returned a #{app.response.status} error: #{app.response.message} \n\n" +
                 "The most common cause is an asset compilation failure. Full HTML response: \n\n #{app.response.body}"
